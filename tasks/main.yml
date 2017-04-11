@@ -1,0 +1,25 @@
+---
+# tasks file for ovh
+
+- name: Reinstall VPS via API
+  ovh:
+    action: reinstall
+    service: "{{ service }}"
+    appkey: "{{ appkey }}"
+    consumerkey: "{{ consumerkey }}"
+    appsecret: "{{ appsecret }}"
+    ssh_keys: "{{ ssh_keys }}"
+
+- name: Accept new ssh fingerprints
+  local_action: command ssh-keyscan -H {{ service }} >> ~/.ssh/known_hosts
+
+- name: Wait for Reinstall to start
+  pause:
+    seconds: 30
+
+- name: Wait for ssh access
+  local_action: shell ssh -o StrictHostKeyChecking=No -o ConnectTimeout=2 -o PasswordAuthentication=No -q root@{{ service }} exit
+  register: result
+  until: result.rc == 0
+  retries: 300
+  delay: 5
