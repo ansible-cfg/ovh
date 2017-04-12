@@ -23,3 +23,7 @@
   until: result.rc == 0
   retries: 300
   delay: 5
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
